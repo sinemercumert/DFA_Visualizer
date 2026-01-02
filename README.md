@@ -1,61 +1,53 @@
-# DFA Pattern Validator & Visualizer
+# DFA Email Pattern Visualizer
 
-This project implements a **Deterministic Finite Automaton (DFA)** capable of handling infinite alphabets (like generic text) through an **abstraction layer**. It is designed to visualize the automaton and validate user input against defined patterns, such as email formats.
+This project implements a Deterministic Finite Automaton (DFA) designed to accept a specific language $L$ defined by custom email formatting rules. The tool visualizes the state diagram and verifies input strings based on an abstraction layer.
 
-## The Logic: Why Abstraction?
+## Formal Definition
 
-In a standard DFA, defining transitions for every possible ASCII character is impossible. This tool solves this by classifying raw characters into abstract symbols before processing:
+The DFA $M$ accepts the language $L(M) = L$, where:
 
-### Abstraction Rules (Σ -> Abstract Alphabet)
-* **Letters (a-z, A-Z)** $\rightarrow$ mapped to `L`
-* **Digits (0-9)** $\rightarrow$ mapped to `D`
-* **Underscore (_)** $\rightarrow$ mapped to `_`
-* **At Symbol (@)** $\rightarrow$ mapped to `@`
-* **Dot (.)** $\rightarrow$ mapped to `.`
-* **Others** $\rightarrow$ mapped to `UNKNOWN`
+$$L = \{ w \in \Sigma^* : \text{name@string1.string2} \}$$
 
-## Use Case: Email Validation
+### Constraints
+The components of the email are defined as follows:
 
-This tool was specifically designed to validate emails in the format:  
-`name@string1.string2`
+1.  **$\Sigma$ (Alphabet):** Any typable character.
+2.  **name:**
+    * $name \in \text{NAME}^*$ where $\text{NAME} = \{ a-z, A-Z, 0-9, \_ \}$
+    * **Rule 1:** Must start with a letter.
+    * **Rule 2:** Must contain at least **1 digit**.
+3.  **string1:**
+    * $string1 \in \text{STRING1}^*$ where $\text{STRING1} = \{ a-z, 0-9 \}$
+    * **Rule:** Must contain **exactly 2 digits**.
+4.  **string2:**
+    * Must be strictly one of the following: `“eu”` or `“pl”`.
 
-Where:
-* `name` $\in$ `{letter, digit, _}*`
-* `string1` $\in$ `{letter, digit}*`
-* `string2` (implicitly) $\in$ `{letter}*`
+## Abstraction Logic
 
-### How to Configure for Email Test
-When running the script (`main.py`), use the following inputs to build the Email Validator DFA:
+Since defining transitions for every ASCII character is inefficient, the Python script translates raw input into abstract symbols before processing:
 
-1.  **States (Q):** `q0, q1, q2, q3, q4`
-2.  **Input Alphabet:** `L, D, _, @, .`
-3.  **Initial State:** `q0`
-4.  **Final States (F):** `q4`
+* **Letters (a-z, A-Z)** $\rightarrow$ `L`
+* **Digits (0-9)** $\rightarrow$ `D`
+* **Underscore (_)** $\rightarrow$ `_`
+* **@** $\rightarrow$ `@`
+* **Dot (.)** $\rightarrow$ `.`
 
-### Transition Table (Input Guide)
+*(Note: To strictly validate "eu" or "pl", the DFA logic assumes the abstract input sequence matches the length and structure of these domains).*
 
-| Current State | Input Symbol | Target State | Logic Explanation |
-| :--- | :---: | :---: | :--- |
-| **q0** (Start) | `L`, `D`, `_` | **q0** | Accepts name chars |
-| **q0** | `@` | **q1** | Expects '@' to proceed |
-| **q1** (After @) | `L`, `D` | **q2** | Start of domain (string1) |
-| **q2** (Domain) | `L`, `D` | **q2** | Accepts domain chars |
-| **q2** | `.` | **q3** | Expects '.' to proceed |
-| **q3** (Extension) | `L` | **q4** | Start of extension (string2) |
-| **q4** (Final) | `L` | **q4** | Accepts extension chars |
+## Requirements
 
-*Note: Any other transition leads to a standard "Trap/Dead" state (implicitly handled as rejection).*
+* Python 3.x
+* Graphviz (System Binary installed and added to PATH)
+* Libraries: `automata-lib`, `visual-automata`
 
-## Installation & Usage
+## Usage
 
-### Prerequisites
-You need **Graphviz** installed on your system (not just the python library).
-* **Windows:** [Download Graphviz](https://graphviz.org/download/) and add to PATH.
-* **Linux:** `sudo apt install graphviz`
-* **Mac:** `brew install graphviz`
-
-### Setup
-1. Clone the repository.
-2. Install python dependencies:
-   ```bash
-   pip install -r requirements.txt
+1.  Install dependencies:
+    ```bash
+    pip install -r requirements.txt
+    ```
+2.  Run the visualizer:
+    ```bash
+    python dfaVisualizer.py
+    ```
+3.  Enter the DFA components (States, Alphabet, Transitions) via the command line interface to model the rules described above.
