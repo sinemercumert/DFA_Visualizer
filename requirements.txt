@@ -1,0 +1,4 @@
+automata-lib
+visual-automata
+pandas
+graphviz
